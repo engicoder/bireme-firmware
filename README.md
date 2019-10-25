@@ -14,11 +14,12 @@ Precompile hex files are included for all if the above in the `precompiled-hex` 
 This firmware is based on the mitosis firmware. The source code has been extensively modified and restructured.
 https://github.com/reversebias/mitosis
 
-Note: The instructions below assume a linux local machine
+> Note: The instructions below assume a linux local machine.
 
 ## Visual Studio Code support
 Visual Studio Code workspace, task and debugging configuration is included in this repository for the wireless portion of the firmware. 
 > Code should be launched using the `vscode.sh` script in the root directory. This script sets up the environment variables using the `setenv.sh` script and starts Code in that environment. 
+
 > Debugging support uses the Cortex-Debug extension. https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug
 
 ## Building QMK firmware
@@ -86,7 +87,7 @@ A few files need to be updated to change configuration paths to coincide with th
 #### Nordic SDK makefile.posix
 This file is located in each of the Nordic SDK directories at 
 ```
-/components/toolchain/gcc/Makefile.posix
+<nrf-sdk-path>/components/toolchain/gcc/Makefile.posix
 ```
 Edit this file and change the `GNU_INSTALL_ROOT` define to match the directory where you extracted the ARM Embedded toolchain. For example
 
@@ -94,14 +95,17 @@ Edit this file and change the `GNU_INSTALL_ROOT` define to match the directory w
 GNU_INSTALL_ROOT := opt/gcc-arm-none-eabi-8-2019-q3-update
 ```
 
-#### setevn.sh script
-This script sets up all environment variables needed by the Bireme makefile. It is located in the bireme root directory. Edit this file and update the variables to the paths on the local machine.
+#### Environment script `setevn.sh`
+The `setenv.sh` script creates the environment variables needed by the Bireme build. The script is located in the bireme root directory. Edit this file and update the variables to the appropriate paths on the local machine.
 
-* `GNU_GCC`      | The path to the ARM embedded toolchain
-* `NRF_SDK_KBD`  | path to the Nordic nRF5 SKD version 15.3.0 
-* `NRF_SDK_RCVR` | path to the Nordic nRF5 SKD version 12.3.0 
-* `NRF_TOOLS`    | path to the Nordic command line tools
-* `SEGGER`       | path to Segger tools (for J-Link)
+ Variable|Usage
+--------------|-------------------------------------------
+`GNU_GCC`|path to the ARM embedded toolchain
+`NRF_SDK_KBD`|path to Nordic nRF5 SDK version 15.3.0 
+`NRF_SDK_RCVR`|path to Nordic nRF5 SDK version 12.3.0 
+`NRF_TOOLS`|path to Nordic command line tools
+`SEGGER`|path to Segger tools (for J-Link)
+`STLINK`|path to ST-Link tools
 
 
 ### Clone Bireme repository
@@ -120,15 +124,14 @@ make
 ```
 
 ### Visual Studio Code build
-Launch Code using the `vscode.sh` script
+Launch Code using the `vscode.sh` script from the root directory of the bireme repository
 ```
 ./vscode.sh
 ```
 
-To build everything, run the `build all` task by 
-* Press `Ctrl+P` and type `task build all` followed by `Enter`
-or 
-* Select `Run Task` from the `Terminal` menu and the select `build all`
+To build everything, run the `build all` task. There are two ways to do this in Visual Studio Code
+1. Press `Ctrl+P` and type `task build all` followed by `Enter`
+1. Select `Run Task` from the `Terminal` menu and the select `build all`
 
 
 
