@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "bireme",
+			"path": "."
+		},
+		{
+			"name": "keyboard",
+			"path": "keyboard"
+		},
+		{
+			"name": "receiver",
+			"path": "receiver"
+		}
+	]
+}

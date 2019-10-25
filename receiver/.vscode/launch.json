@@ -1,0 +1,35 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "_build/bireme_receiver.out",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "device": "nrf51",
+            "interface": "swd",
+            "ipAddress": null,
+            "serialNumber": "${input:jlink_sn}",
+            "armToolchainPath": "/opt/gcc-arm-none-eabi-8-2019-q3-update/bin/",
+            "runToMain": true
+        }
+    ],
+    "inputs": [
+        {
+            "id": "jlink_sn",
+            "description": "J-Link Serial Number",
+            "options": [
+                "260104929",
+                "260117691",
+                "682140491"
+              ],
+            "default": "250104929",
+            "type": "pickString"
+        },
+    ] 
+}

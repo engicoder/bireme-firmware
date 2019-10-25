@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "PCA10056",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/pca10056/blank/config",
+                "${env:GNU_GCC}/arm-none-eabi/include",
+                "${env:NRF_SDK}/**"
+            ],
+            "defines": [
+                "BOARD_PCA10056",
+                "CONFIG_GPIO_AS_PINRESET",
+                "INITIALIZE_USER_SECTIONS",
+                "FLOAT_ABI_HARD",
+                "NRF52",
+                "NRF52840_XXAA",
+                "NRF_SD_BLE_API_VERSION=6",
+                "S140",
+                "SOFTDEVICE_PRESENT",
+                "SWI_DISABLE0",
+                "__CC_ARM"
+            ],
+
+            "compilerPath": "${env:GNU_GCC}/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
