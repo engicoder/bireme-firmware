@@ -4,22 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build left",
+            "label": "build",
             "type": "shell",
-            "command": "make bireme_keyboard_left",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "label": "build right",
-            "type": "shell",
-            "command": "make bireme_keyboard_left",
+            "command": "make bireme_keyboard_${input:kbd_side}",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -39,25 +26,15 @@
             "problemMatcher": []
         },
         {
-            "label": "flash left",
+            "label": "flash",
             "type": "shell",
-            "command": "make flash_left JLINK_SERIAL=${input:jlink_sn}",
+            "command": "make flash_${input:kbd_side} JLINK_SERIAL=${input:jlink_sn}",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "group": "build",
             "problemMatcher": []
         },
-        {
-            "label": "flash right",
-            "type": "shell",
-            "command": "make flash_right JLINK_SERIAL=${input:jlink_sn}",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "group": "build",
-            "problemMatcher": []
-        },        
         {
             "label": "sdk_config",
             "type": "shell",
@@ -89,5 +66,15 @@
             "default": "250104929",
             "type": "pickString"
         },
+        {
+            "id": "kbd_side",
+            "description": "Keyboard Side",
+            "options": [
+                "left",
+                "right",
+              ],
+            "default": "left",
+            "type": "pickString"
+        },        
     ]    
 }

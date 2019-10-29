@@ -5,9 +5,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            "name": "J-Link",
             "cwd": "${workspaceRoot}",
-            "executable": "_build/bireme_keyboard.out",
+            "executable": "_build/bireme_keyboard_${input:kbd_side}.out",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "jlink",
@@ -15,7 +15,21 @@
             "interface": "swd",
             "ipAddress": null,
             "serialNumber": "${input:jlink_sn}",
-            "armToolchainPath": "/opt/gcc-arm-none-eabi-8-2019-q3-update/bin/",
+            "armToolchainPath": "${env:GCC_ARM}/bin/",
+            "runToMain": true
+        },
+        {
+            "name": "ST-Link(OpenOCD)",
+            "cwd": "${workspaceRoot}",
+            "executable": "_build/bireme_keyboard_${input:kbd_side}.out",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "nrf52",
+            "configFiles": [
+                "nrf52-stlink.cfg"
+            ],
+            "armToolchainPath": "${env:GCC_ARM}/bin/",
             "runToMain": true
         }
     ],
@@ -31,5 +45,15 @@
             "default": "250104929",
             "type": "pickString"
         },
+        {
+            "id": "kbd_side",
+            "description": "Keyboard Side",
+            "options": [
+                "left",
+                "right",
+              ],
+            "default": "left",
+            "type": "pickString"
+        },        
     ] 
 }

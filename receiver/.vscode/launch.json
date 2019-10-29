@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            "name": "J-Link",
             "cwd": "${workspaceRoot}",
             "executable": "_build/bireme_receiver.out",
             "request": "launch",
@@ -15,7 +15,21 @@
             "interface": "swd",
             "ipAddress": null,
             "serialNumber": "${input:jlink_sn}",
-            "armToolchainPath": "/opt/gcc-arm-none-eabi-8-2019-q3-update/bin/",
+            "armToolchainPath": "${env:GCC_ARM}/bin/",
+            "runToMain": true
+        },
+        {
+            "name": "ST-Link(OpenOCD)",
+            "cwd": "${workspaceRoot}",
+            "executable": "_build/bireme_receiver.out",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "nrf51",
+            "configFiles": [
+                "nrf52-stlink.cfg"
+            ],
+            "armToolchainPath": "${env:GCC_ARM}/bin/",
             "runToMain": true
         }
     ],

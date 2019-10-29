@@ -31,12 +31,14 @@ QMK source tree inorder to build.
 * Copy the qmk/bireme folder to qmk_firmware/keyboards directory in the QML source tree.
 * From the qmk_firmware root directory, build the Bireme firmware with the following command
     'make bireme:default'
+### Flashing QMK firmware
+Bireme uses the factory ATmega32u4 bootloader for flashing firmware. 'dfu-programmer` can be used to flash the device as follows:
 
-Bireme used the default ATmega32u4 bootloader for flashing firmware. 'dfu-programmer` can be used to flash the device with the following commands:
+Press the reset button on Bireme receiver. The receiver will reset and enter update mode. From command line, execute the following commands:
 '''
-dfu-programmer.exe atmega32u4 erase
-dfu-programmer.exe atmega32u4 flash bireme_default.hex
-dfu-programmer.exe atmega32u4 reset
+dfu-programmer atmega32u4 erase
+dfu-programmer atmega32u4 flash bireme_default.hex
+dfu-programmer atmega32u4 reset
 '''
 
 ## Building wireless firmware
@@ -46,42 +48,20 @@ dfu-programmer.exe atmega32u4 reset
 * ARM Embedded Toolchain
 * Nordic nRF5 SDK 12.3.0
 * Nordic nRF5 SDK 15.3.0
-* Nordic command line tools
-* SWD programmer software
 
 #### Download Arm Embedded Toolchain
-
 https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads
 
 Extract to the local machine: (suggested location: /opt)
-
 Note: This code was developed and tested using the 8-2019-q3-update version
 
 #### Download Nordic SDK 
-
 https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK/Download#infotabs
 
-Download versions 12.3.0 and 15.3.0
+Download SDK versions 12.3.0 and 15.3.0
 Extract both to the same base directory (in the home directory, i.e. ~/nrf-sdk)
 
-#### Download the Nordic command line tools
-
-https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools/Download#infotabs\
-
-Extract to the local machine: (suggested location: /opt)
-Note: Nordic has a Debian install package but it does not seem to update paths correctly.
-
-#### SWD programmer software
-
-The nRF modules must be programmed using the ARM SWD (Single wire debugging) interface. 
-There are several devices available that can be used to flash the firmware via SWD including:
-
-* Segger J-Link
-* STmicroelextronics ST-Link
-* Chinese clones of J-Link and ST-Link
-
 ### Path configuration
-
 A few files need to be updated to change configuration paths to coincide with the locations on the machine.
 
 #### Nordic SDK makefile.posix
@@ -100,16 +80,12 @@ The `setenv.sh` script creates the environment variables needed by the Bireme bu
 
  Variable|Usage
 --------------|-------------------------------------------
-`GNU_GCC`|path to the ARM embedded toolchain
+`GCC_ARM`|path to the ARM embedded toolchain
 `NRF_SDK_KBD`|path to Nordic nRF5 SDK version 15.3.0 
 `NRF_SDK_RCVR`|path to Nordic nRF5 SDK version 12.3.0 
 `NRF_TOOLS`|path to Nordic command line tools
-`SEGGER`|path to Segger tools (for J-Link)
-`STLINK`|path to ST-Link tools
-
 
 ### Clone Bireme repository
-
 Clone the bireme source repository to the local machine
 ```
 git clone https://github.com/engicoder/bireme
@@ -134,6 +110,91 @@ To build everything, run the `build all` task. There are two ways to do this in 
 1. Select `Run Task` from the `Terminal` menu and the select `build all`
 
 
+## Flashing and Debugging firmware
+The nRF modules can be programmed using the ARM SWD (Single wire debugging) interface. OpenOCD is detailed here but other tools are available such as those from SEGGER.
+
+### OpenOCD installation
+OpenOCD supports flashing/programming and debugging of both the receiver and keyboard using either J-Link or ST-Link. The current release version of OpenOCD (0.10.0) does not include support for the nRF52840 device used by the keyboard halves, therefore a version using the latest updates must be built/installed. 
+
+There are a few dependencies needed to ensure that OpenOCD can function properly. Install these packages
+
+```
+sudo apt-get install make libtool pkg-config autoconf automake texinfo libusb-1.0-0-dev
+```
+
+Clone the OpenOCD source code repository from the Github mirror
+```
+git clone --recursive https://github.com/ntfreak/openocd
+```
+
+From the OpenOCD repository root directory, execute the build
+```    
+./bootstrap
+./configure
+make
+```
+
+Install the build version of OpenOCD. (will be installed to `/usr/local/bin`)
+```
+sudo make install
+```
+
+
+### udev device rules configuration
+The latest udev device rules for OpenOCD compatible devices need to be installed for OpenOCD to access the device. 
+The rules file can be found in the Bireme root directory and can be installed as follows:
+Copy the rules file:
+```
+sudo cp utils/60-openocd.rules /etc/udev/rule.d/
+```
+Add the current user to the plugdev group so that OpenOCD does not have to run as root. Note: The rules file gives access the OpenOCD compatible device to the 'plugdev' group.
+```
+sudo useradd -G plugdev $(whoami)
+```
+Reload the rules:
+```
+sudo udevadm control --reload-rules
+```
+Restart udev
+```
+sudo udevadm trigger
+```
+
+### Hardware programmer/debuggers
+There are several devices available that can be used to program and debug the firmware via SWD including:
+
+* Segger J-Link
+* STmicroelextronics ST-Link
+* Chinese clones of J-Link or ST-Link
+Note: I have not tested any of the FTDI based devices
+
+## Flashing wireless firmware
+The firmware can be flashed using the OpenOCD server with either J-Link or ST-Link, or with the Nordic `nrfjprog` tool on J-link. The Nordic tools do not support ST-Link.
+
+### Flashing firmware with OpenOCD
+
+Start the OpenOCD server specifying the appropriate `<config-file>` and `<firmware-file>`
+```
+openocd -f <config-file> -c init -c "reset init" -c "program <firmware-file> verify" -c reset - c exit
+```
+ file|receiver|keyboard left| keyboard right 
+----------------|------------------|------------------|------------------
+`<config-file>`|nrf51-stlink.cfg|nrf52-stlink.cfg|nrf52-stlink.cfg
+`<firmware-file>`|bireme_receiver.out|bireme_keyboard_left.out|bireme_keyboard_right.out
+
+### Optional tools and software
+
+#### J-Link
+The latest J-Link software is recommended and can be downloaded from:
+https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack
+
+#### Nordic command line tools
+The Nordic command line tools can be used to program the devices if you are using J-Link. This is optional.
+The tools can be download from:
+https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools/Download#infotabs\
+
+Extract to the local machine: (suggested location: /opt)
+Note: Nordic has a Debian install package but it does not seem to update paths correctly.
 
 
 
@@ -147,11 +208,7 @@ To build everything, run the `build all` task. There are two ways to do this in 
 
 
 
-
-
-
-
-
+$OPENOCD/src/openocd -s $OPENOCD/tcl -f interface/stlink-v2.cfg -f target/nrf52.cfg -c init -c "reset init" -c halt -c "nrf52 mass_erase" -c "program $FIRMWARE verify" -c reset -c exit
 
 
 

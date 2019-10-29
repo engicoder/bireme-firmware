@@ -1,12 +1,22 @@
 {
     "configurations": [
         {
-            "name": "bireme",
+            "name": "bireme_receiver",
             "includePath": [
                 "${workspaceFolder}/**",
                 "${env:GCC_ARM}/arm-none-eabi/include",
-                "${env:NRF_SDK}/**"
+                "${env:NRF_SDK_RCVR}/**"
             ],
+            "defines": [
+                "GAZELL_PRESENT",
+                "NRF51",
+                "USE_SD_HW_RESOURCES",
+                "GAZELL_ALTERNATIVE_RESOURCES",
+                "SWI_DISABLE0",
+                "NRF51822",
+                "__CC_ARM"
+            ],
+
             "compilerPath": "${env:GCC_ARM}/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",

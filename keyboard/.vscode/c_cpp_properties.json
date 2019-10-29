@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "bireme_keyboard",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:GCC_ARM}/arm-none-eabi/include",
+                "${env:NRF_SDK_KBD}/**"
+            ],
+            "defines": [
+                "CONFIG_GPIO_AS_PINRESET",
+                "INITIALIZE_USER_SECTIONS",
+                "FLOAT_ABI_HARD",
+                "NRF52",
+                "NRF52840_XXAA",
+                "NRF_SD_BLE_API_VERSION=6",
+                "CONFIG_NFCT_PINS_AS_GPIOS",
+                "GAZELL_PRESENT",
+                "USE_SD_HW_RESOURCES",
+                "GAZELL_ALTERNATIVE_RESOURCES",
+                "SWI_DISABLE0",
+                "__CC_ARM"
+            ],
+
+            "compilerPath": "${env:GCC_ARM}/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
