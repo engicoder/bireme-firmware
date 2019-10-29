@@ -1,20 +1,46 @@
 # Bireme Keyboard Firmware
 This repository contains firwmare for the bireme keyboard and associate receiver. This firmware resides in three sub-directories:
+<table>
+    <tr>
+        <td><code>keyboard</code></td>
+        <td>Wireless firmware for nRF51822 on the left and right halves of bireme keyboard</td>
+    </tr>
+    <tr>
+        <td><code>qmk</code></td>
+        <td>QMK portion of firmware for the ATmega32u4 on the receiver</td>
+    </tr>
+    <tr>
+        <td><code>receiver</code></td>
+        <td>wireless firmware for the nRF51822 on the receiver</td>
+    </tr>
+</table>   
 
-1. qmk      | qmk portion of firmware for the ATmega32u4 the receiver
-1. keyboard | wireless firmware for nRF51822 on the left and right halves of bireme keyboard
-1. receiver | wireless firmware for the nRF51822 on the receiver
+### Precompiled binaries
+Precompile hex files for all firmware parts are included in the `precompiled-hex` directory. The files are:
+<table>
+    <tr>
+        <td><code>bireme_default.hex</code></td>
+        <td>QMK firmware. Flash to ATmega32u4 on receiver
+    </tr>
+    <tr>
+        <td><code>bireme_keyboard_left.hex</code></td>
+        <td>Flash to nRF51822 on left keyboard half.
+    </tr>
+    <tr>
+        <td><code>bireme_keyboard_right.hex</code></td>
+        <td>Flash to nRF51822 on right keyboard half.
+    </tr>
+    <tr>
+        <td><code>bireme_receiver.hex</code></td>
+        <td>Flash to nRF51822 on the receiver.
+    </tr>
+</table>   
 
-Precompile hex files are included for all if the above in the `precompiled-hex` directory. The files are:
-* bireme_default.hex        | QMK firmware. Flash to ATmega32u4 on receiver
-* bireme_keyboard_left.hex  | Flash to nRF51822 on left keyboard half.
-* bireme_keyboard_right.hex | Flash to nRF51822 on right keyboard half.
-* bireme_receiver.hex       | Flash to nRF51822 on the receiver.
 
-This firmware is based on the mitosis firmware. The source code has been extensively modified and restructured.
-https://github.com/reversebias/mitosis
+This firmware is based on the mitosis firmware. https://github.com/reversebias/mitosis
+The source code has been extensively modified and restructured.
 
-> Note: The instructions below assume a linux local machine.
+> Note: The instructions give here assume a linux local machine.
 
 ## Visual Studio Code support
 Visual Studio Code workspace, task and debugging configuration is included in this repository for the wireless portion of the firmware. 
@@ -173,18 +199,39 @@ The firmware can be flashed using the OpenOCD server with either J-Link or ST-Li
 
 ### Flashing firmware with OpenOCD
 
-Start the OpenOCD server specifying the appropriate `<config-file>` and `<firmware-file>`
+OpenOCD runs a server that exposes a telnet port that can be used for commands.
+
+Start the OpenOCD server by specifying the configuration file with the '-f' flag.
 ```
-openocd -f <config-file> -c init -c "reset init" -c "program <firmware-file> verify" -c reset - c exit
+openocd -f <config-file>
 ```
- file|receiver|keyboard left| keyboard right 
-----------------|------------------|------------------|------------------
-`<config-file>`|nrf51-stlink.cfg|nrf52-stlink.cfg|nrf52-stlink.cfg
-`<firmware-file>`|bireme_receiver.out|bireme_keyboard_left.out|bireme_keyboard_right.out
+where `<config-file>` is:
+* `nrf51-stlink.cfg` for receiver 
+* `nrf52-stlink.cfg` for keyboard
+
+Once the OpenOCD server is running, you can send commands via a telnet session:
+```
+telnet localhost 4444
+```
+To program the device, issue the following commands via the telnet session:
+```
+> reset halt
+> program `<firmware-file>` verify
+> reset
+```
+where `<firmware-file>` is the full path to the firmware .hex file. See [Precompiled binaries](#precompiled-binaries) for list of hex files and usage. Locally built .hex files can be found in:
+* `receiver/_build` for the receiver
+* `keyboard/_build` for the keyboard
+
 
 ### Optional tools and software
 
-#### J-Link
+#### ST-Link
+ST-Link utilities to query information on ST-Link devices can be found at:
+https://github.com/texane/stlink
+Note: For Debian based linux distros such as Ubuntu you will need to build the utilities from source.
+
+#### J-Link 
 The latest J-Link software is recommended and can be downloaded from:
 https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack
 
@@ -195,21 +242,6 @@ https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line
 
 Extract to the local machine: (suggested location: /opt)
 Note: Nordic has a Debian install package but it does not seem to update paths correctly.
-
-
-
-
-
-
-
-
-
-
-
-
-
-$OPENOCD/src/openocd -s $OPENOCD/tcl -f interface/stlink-v2.cfg -f target/nrf52.cfg -c init -c "reset init" -c halt -c "nrf52 mass_erase" -c "program $FIRMWARE verify" -c reset -c exit
-
 
 
 
