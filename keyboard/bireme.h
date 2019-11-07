@@ -38,6 +38,8 @@
     #define S33 {0, 27}
     #define S34 {0, 25}
 
+    #define PIPE_NUMBER BIREME_LEFT_HAND_PIPE
+
 #elif defined (RIGHT_HAND)
 
     /* Right hand key definitions */
@@ -77,12 +79,12 @@
     #define S33 {0, 20}
     #define S34 {0, 24}
 
+    #define PIPE_NUMBER BIREME_RIGHT_HAND_PIPE
+
 #else
     #error Side not defined. Must be one of LEFT_HAND or RIGHT_HAND.
 #endif
 
-
-#define PIPE_NUMBER 0
 
 
 // Low frequency clock source to be used by the SoftDevice

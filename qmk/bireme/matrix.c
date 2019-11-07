@@ -47,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    define ROW_SHIFTER  ((uint32_t)1)
 #endif
 
-#define SERIAL_RX_DATA_LENGTH 13//((2 * MATRIX_ROWS) + 1)
+#define SERIAL_RX_DATA_LENGTH ((2 * (MATRIX_ROWS + 1)) + 1)
 
 
 /* matrix state(1:on, 0:off) */
@@ -89,7 +89,7 @@ void matrix_init(void) {
 
 uint8_t matrix_scan(void)
 {
-    static uint8_t uart_data[13];
+    static uint8_t uart_data[SERIAL_RX_DATA_LENGTH];
 
     uint32_t timeout = 0;
 
@@ -97,21 +97,19 @@ uint8_t matrix_scan(void)
 
 
     //trust the external keystates entirely, erase the last data
-    memset(uart_data, 0, 13);
+    memset(uart_data, 0, SERIAL_RX_DATA_LENGTH);
 
     //the s character requests the RF slave to send the matrix
     SERIAL_UART_DATA = 's';
 
     uint8_t i;
-    //there are 12 bytes (1 byte for each row in each half), and an end byte
-    for (i = 0; i < 13; i++) {
+    for (i = 0; i < SERIAL_RX_DATA_LENGTH; i++) {
         //wait for the serial data, timeout if it's been too long
         //this only happened in testing with a loose wire, but does no
         //harm to leave it in here
         while(!SERIAL_UART_RXD_PRESENT){
             timeout++;
             if (timeout > 100000){
-                grn_led_off;
                 break;
             }
         }
@@ -119,17 +117,21 @@ uint8_t matrix_scan(void)
         uart_data[i] = SERIAL_UART_DATA;
     }
 
-    //check for the end packet, the key state bytes use the LSBs, so 0xE0
-    //will only show up here if the correct bytes were recieved
-    if (uart_data[12] == 0xE0)
+    /* End of Packet indicated by 0xE0 */
+    if (uart_data[SERIAL_RX_DATA_LENGTH - 1] == 0xE0)
     {
-        grn_led_on;
 
         //shifting and transferring the keystates to the QMK matrix variable
         for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
             matrix_row_t row = (uint16_t) uart_data[i*2] | (uint16_t) uart_data[i*2+1] << (MATRIX_COLS/2);
             matrix[i] = row;
         }
+
+        /* Check battery levels */
+        if (uart_data[SERIAL_RX_DATA_LENGTH-2] < 50 || 
+            uart_data[SERIAL_RX_DATA_LENGTH-3] < 50)
+            wht_led_on;
+
     }
 
 

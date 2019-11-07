@@ -45,7 +45,9 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_rtc.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_saadc.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/bat_level.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
@@ -57,6 +59,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/proprietary_rf/gzll \
   $(SDK_ROOT)/integration/nrfx \
   $(PROJ_DIR) \
+  $(PROJ_DIR)/.. \
   $(PROJ_DIR)/config \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \

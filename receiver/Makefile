@@ -40,6 +40,7 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   $(PROJ_DIR) \
+  $(PROJ_DIR)/.. \
   $(PROJ_DIR)/config\
   $(SDK_ROOT)/components/proprietary_rf/gzll \
   $(SDK_ROOT)/components/toolchain/gcc \

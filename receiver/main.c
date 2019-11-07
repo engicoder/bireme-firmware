@@ -12,6 +12,8 @@
 #include "nrf_gzll.h"
 #include "nrf_gzll_error.h"
 
+#include "bireme_gzll_config.h"
+
 #define MAX_TEST_DATA_BYTES     (15U)                /**< max number of test bytes to be used for tx and rx. */
 #define UART_TX_BUF_SIZE 256                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE 1                           /**< UART RX buffer size. */
@@ -25,11 +27,16 @@
 
 
 #define RTC_INACTIVE_PRESCALER   32
-#define RTC_INACTIVE_INTERVAL    125
+#define RTC_INACTIVE_INTERVAL    BIREME_KEEP_ALIVE_TIMEOUT
 
 // Define payload length
-#define ACK_PAYLOAD_LENGTH 1
-#define KEY_PAYLOAD_LENGTH 13
+#define ACK_PAYLOAD_LENGTH BIREME_GZLL_ACK_PAYLOAD_LEN
+#define KEY_PAYLOAD_LENGTH BIREME_GZLL_DATA_PAYLOAD_LEN
+
+#define MATRIX_ROWS 6
+#define QMK_UPDATE_LENGTH ((2 * (MATRIX_ROWS + 1)) + 1)
+
+
 
 /* Inactivity timeout in units of 125ms. 
  * Keyboard(s) at a minimum send a keep alive update every 125ms. */
@@ -39,7 +46,7 @@
 static uint8_t data_payload_left[NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH];  ///< Placeholder for data payload received from host. 
 static uint8_t data_payload_right[NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH];  ///< Placeholder for data payload received from host. 
 static uint8_t ack_payload[ACK_PAYLOAD_LENGTH];                   ///< Payload to attach to ACK sent to device.
-static uint8_t data_buffer[KEY_PAYLOAD_LENGTH];
+static uint8_t data_buffer[QMK_UPDATE_LENGTH];
 
 const nrf_drv_rtc_t rtc_inactive = NRF_DRV_RTC_INSTANCE(0); /**< Declaring an instance of nrf_drv_rtc for RTC0. */
 
@@ -99,6 +106,7 @@ static void handler_inactive(nrf_drv_rtc_int_type_t int_type)
         data_buffer[6] = 0;
         data_buffer[8] = 0;
         data_buffer[10] = 0;
+        data_buffer[12]  = 100;
     }
     if (right_inactive == INACTIVITY_TIMEOUT)
     {
@@ -108,6 +116,7 @@ static void handler_inactive(nrf_drv_rtc_int_type_t int_type)
         data_buffer[7] = 0;
         data_buffer[9] = 0;
         data_buffer[11] = 0;
+        data_buffer[13]  = 100;
     }
 }
 
@@ -219,7 +228,9 @@ void process_data_left(void)
                      ((data_payload_left[4] & 1<<0) ? 1:0) << 6;  /* L32 */
 
     data_buffer[10]= ((data_payload_left[4] & 1<<1) ? 1:0) << 5 | /* L33 */
-                     ((data_payload_left[4] & 1<<2) ? 1:0) << 6;  /* L34 */
+                      ((data_payload_left[4] & 1<<2) ? 1:0) << 6;  /* L34 */
+
+    data_buffer[12] = data_payload_left[5];
 }
 
 void process_data_right(void)
@@ -264,6 +275,8 @@ void process_data_right(void)
 
     data_buffer[11]= ((data_payload_right[4] & 1<<1) ? 1:0) << 1 | /* R33 */
                      ((data_payload_right[4] & 1<<2) ? 1:0) << 0;  /* R34 */
+
+    data_buffer[13] = data_payload_right[5];
 }
 
 void gazell_init(void)
@@ -323,8 +336,8 @@ int main(void)
         if (result == NRF_SUCCESS && c == 's')
         {
             data_sent = false;
-            data_buffer[KEY_PAYLOAD_LENGTH-1] = 0xE0;
-            for (uint32_t i = 0; i < KEY_PAYLOAD_LENGTH; i++)
+            data_buffer[QMK_UPDATE_LENGTH - 1] = 0xE0;
+            for (uint32_t i = 0; i < QMK_UPDATE_LENGTH; i++)
             {
                 while (app_uart_put(data_buffer[i]) != NRF_SUCCESS);
             }
@@ -346,12 +359,12 @@ void nrf_gzll_host_rx_data_ready(uint32_t pipe, nrf_gzll_host_rx_info_t rx_info)
 {   
     uint32_t data_payload_length = NRF_GZLL_CONST_MAX_PAYLOAD_LENGTH;
     
-    if (pipe == 0)
+    if (pipe == BIREME_LEFT_HAND_PIPE)
     {
         packet_received_left = true;
         nrf_gzll_fetch_packet_from_rx_fifo(pipe, data_payload_left, &data_payload_length);
     }
-    else if (pipe == 1)
+    else if (pipe == BIREME_RIGHT_HAND_PIPE)
     {
         packet_received_right = true;
         nrf_gzll_fetch_packet_from_rx_fifo(pipe, data_payload_right, &data_payload_length);
